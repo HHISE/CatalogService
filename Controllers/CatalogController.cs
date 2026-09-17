@@ -63,6 +63,12 @@ namespace CatalogService.Controllers;
             _logger = logger;
         }
         
+        [HttpGet]
+        public IEnumerable<Product> GetAll()
+        {
+            return Catalog;
+        }
+        
         [HttpGet("product/{productId}", Name = "GetProductById")]
         public ActionResult<Product> Get(Guid productId)
         {
