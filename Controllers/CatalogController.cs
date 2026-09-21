@@ -59,7 +59,7 @@ namespace CatalogService.Controllers;
             {
                 _logger.LogDebug($"Getting product: {productId}");
 
-                var product = Catalog.FirstOrDefault(p => p.Id == productId);
+                var product = Catalog.FirstOrDefault(p => p.ProductId == productId);
 
                 if (product == null)
                 {
