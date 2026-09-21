@@ -46,20 +46,32 @@ namespace CatalogService.Controllers;
             _logger = logger;
         }
         
-        [HttpGet("productindex/{index}", Name = "GetProductAtIndex")]
-        public ActionResult<Product> Get(int index)
+        [HttpGet]
+        public IEnumerable<Product> GetAll()
+        {
+            return Catalog;
+        }
+        
+        [HttpGet("product/{productId}", Name = "GetProductById")]
+        public ActionResult<Product> Get(Guid productId)
         {
             try
             {
-                _logger.LogDebug($"Getting product index");
-                var product = Catalog.GetValue(index);
+                _logger.LogDebug($"Getting product: {productId}");
+
+                var product = Catalog.FirstOrDefault(p => p.Id == productId);
+
+                if (product == null)
+                {
+                    return NotFound();
+                }
+
                 return Ok(product);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error getting product index");
+                _logger.LogError(ex, $"Error getting product: {productId}");
                 return BadRequest();
             }
-            
         }
     }
