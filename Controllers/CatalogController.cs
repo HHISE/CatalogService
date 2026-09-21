@@ -14,30 +14,27 @@ namespace CatalogService.Controllers;
         [
             new Product
             {
-                ProductId = Guid.NewGuid(),
+                Id = Guid.NewGuid(),
                 Name = "iPhone 16",
                 Description = "Apple smartphone med avanceret kamera og OLED-skærm.",
                 Price = 7999.00m,
-                ImageUrl = "https://example.com/iphone16.jpg",
             },
 
             new Product
             {
-                ProductId = Guid.NewGuid(),
+                Id = Guid.NewGuid(),
                 Name = "Galaxy S25",
                 Description = "Samsung smartphone med AMOLED-skærm og kraftig processor.",
                 Price = 6999.00m,
-                ImageUrl = "https://example.com/galaxys25.jpg",
 
             },
 
             new Product
             {
-                ProductId = Guid.NewGuid(),
+                Id = Guid.NewGuid(),
                 Name = "MacBook Air M4",
                 Description = "Let og kraftfuld bærbar computer med Apple M4-chip.",
                 Price = 9499.00m,
-                ImageUrl = "https://example.com/macbookair.jpg",
             }
         ];
 
@@ -52,14 +49,14 @@ namespace CatalogService.Controllers;
             return Catalog;
         }
         
-        [HttpGet("product/{productId}", Name = "GetProductById")]
-        public ActionResult<Product> Get(Guid productId)
+        [HttpGet("product/{Id}")]
+        public ActionResult<Product> Get(Guid Id)
         {
             try
             {
-                _logger.LogDebug($"Getting product: {productId}");
+                _logger.LogDebug($"Getting product: {Id}");
 
-                var product = Catalog.FirstOrDefault(p => p.ProductId == productId);
+                var product = Catalog.FirstOrDefault(product => product.Id == Id);
 
                 if (product == null)
                 {
@@ -70,7 +67,7 @@ namespace CatalogService.Controllers;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error getting product: {productId}");
+                _logger.LogError(ex, $"Error getting product: {Id}");
                 return BadRequest();
             }
         }
