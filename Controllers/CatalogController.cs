@@ -1,4 +1,5 @@
 using CatalogService.Models;
+using CatalogService.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatalogService.Controllers;
@@ -7,56 +8,30 @@ namespace CatalogService.Controllers;
     [Route("[controller]")]
     public class CatalogController : ControllerBase
     {
+        private CatalogRepository _catalogRepository;
         private readonly ILogger<CatalogController> _logger;
-        
-        
-        private static readonly Product[] Catalog =
-        [
-            new Product
-            {
-                Id = Guid.NewGuid(),
-                Name = "iPhone 16",
-                Description = "Apple smartphone med avanceret kamera og OLED-skærm.",
-                Price = 7999.00m,
-            },
 
-            new Product
-            {
-                Id = Guid.NewGuid(),
-                Name = "Galaxy S25",
-                Description = "Samsung smartphone med AMOLED-skærm og kraftig processor.",
-                Price = 6999.00m,
-
-            },
-
-            new Product
-            {
-                Id = Guid.NewGuid(),
-                Name = "MacBook Air M4",
-                Description = "Let og kraftfuld bærbar computer med Apple M4-chip.",
-                Price = 9499.00m,
-            }
-        ];
-
-        public CatalogController(ILogger<CatalogController> logger)
+        public CatalogController(ILogger<CatalogController> logger,  CatalogRepository catalogRepository)
         {
             _logger = logger;
+            _catalogRepository =catalogRepository ;
         }
         
         [HttpGet]
-        public IEnumerable<Product> GetAll()
+        public async Task<ActionResult<IEnumerable<Product>>> GetAll()
         {
-            return Catalog;
+            List<Product> catalog = await _catalogRepository.GetAll();
+            return Ok(catalog);
         }
         
-        [HttpGet("product/{Id}")]
-        public ActionResult<Product> Get(Guid Id)
+        [HttpGet("product/{id}")]
+        public async Task<ActionResult<Product>> GetById(int id)
         {
             try
             {
-                _logger.LogDebug($"Getting product: {Id}");
+                _logger.LogDebug($"Getting product: {id}");
 
-                var product = Catalog.FirstOrDefault(product => product.Id == Id);
+                var product = await _catalogRepository.GetById(id);
 
                 if (product == null)
                 {
@@ -67,8 +42,46 @@ namespace CatalogService.Controllers;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error getting product: {Id}");
+                _logger.LogError(ex, $"Error getting product: {id}");
                 return BadRequest();
             }
         }
+
+        [HttpPost("addproduct")]
+        public async Task<ActionResult<Product>> AddProduct(Product product)
+        {
+            var addedProduct = await _catalogRepository.AddProduct(product);
+            return Ok(addedProduct);
+        }
+        
+
+        [HttpDelete("deleteproductbyid/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _catalogRepository.Delete(id);
+            if (!success)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
+        
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> Update(int id, Product product)
+        {
+            if (id != product.Id)
+            {
+                return BadRequest("Id i URL matcher ikke id i produktet.");
+            }
+
+            var success = await _catalogRepository.Update(id, product);
+            if (!success)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
+        
     }
