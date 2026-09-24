@@ -2,7 +2,7 @@ using MongoDB.Driver;
 using CatalogService.Models;
 namespace CatalogService.Repositories;
 
-public class CatalogRepository
+public class CatalogRepository : ICatalogRepository
 {
     private IMongoCollection<Product> _collection;
 

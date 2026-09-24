@@ -1,6 +1,6 @@
 namespace CatalogService.Repositories;
 
-public class ICatalogRepository
+public interface ICatalogRepository
 {
     
         
