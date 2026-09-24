@@ -24,15 +24,14 @@ namespace CatalogService.Controllers;
             return Ok(catalog);
         }
         
-        [HttpGet("product/{Id}")]
-        public async Task<ActionResult<Product>> GetById(int Id)
+        [HttpGet("product/{id}")]
+        public async Task<ActionResult<Product>> GetById(int id)
         {
-            List<Product> catalog = await _catalogRepository.GetAll();
             try
             {
-                _logger.LogDebug($"Getting product: {Id}");
+                _logger.LogDebug($"Getting product: {id}");
 
-                var product = catalog.FirstOrDefault(product => product.Id == Id);
+                var product = await _catalogRepository.GetById(id);
 
                 if (product == null)
                 {
@@ -43,7 +42,7 @@ namespace CatalogService.Controllers;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error getting product: {Id}");
+                _logger.LogError(ex, $"Error getting product: {id}");
                 return BadRequest();
             }
         }
@@ -51,41 +50,38 @@ namespace CatalogService.Controllers;
         [HttpPost("addproduct")]
         public async Task<ActionResult<Product>> AddProduct(Product product)
         {
-            if (product == null)
-            {
-                return BadRequest();
-            }
-
-            var addedProduct = await _catalogRepository.Add(product);
+            var addedProduct = await _catalogRepository.AddProduct(product);
             return Ok(addedProduct);
         }
         
 
-        [HttpDelete]
-        [Route("deleteproductbyid/{id}")]
-        public async Task<ActionResult<Product>> Delete(int id)
+        [HttpDelete("deleteproductbyid/{id}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            Product product = await _catalogRepository.GetById(id);
-            if (product == null)
+            var success = await _catalogRepository.Delete(id);
+            if (!success)
             {
                 return NotFound();
             }
 
-            await _catalogRepository.Delete(id);
             return NoContent();
-        } 
+        }
         
         [HttpPut("update/{id}")]
-        public async Task<ActionResult<Product>> Update(int id, Product product)
+        public async Task<IActionResult> Update(int id, Product product)
         {
-            Product existing = await _catalogRepository.GetById(id);
-            if (existing == null)
+            if (id != product.Id)
+            {
+                return BadRequest("Id i URL matcher ikke id i produktet.");
+            }
+
+            var success = await _catalogRepository.Update(id, product);
+            if (!success)
             {
                 return NotFound();
             }
 
-            await _catalogRepository.Update(product);
-            return Ok(product);
+            return NoContent();
         }
         
     }
