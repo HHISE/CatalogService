@@ -1,6 +1,7 @@
 using CatalogService.Models;
 using CatalogService.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace CatalogService.Controllers;
 
@@ -8,13 +9,34 @@ namespace CatalogService.Controllers;
     [Route("[controller]")]
     public class CatalogController : ControllerBase
     {
-        private CatalogRepository _catalogRepository;
+        private ICatalogRepository _catalogRepository;
         private readonly ILogger<CatalogController> _logger;
 
-        public CatalogController(ILogger<CatalogController> logger,  CatalogRepository catalogRepository)
+        public CatalogController(ILogger<CatalogController> logger,  ICatalogRepository catalogRepository)
         {
             _logger = logger;
             _catalogRepository =catalogRepository ;
+        }
+        
+        [HttpGet("version")]
+        public async Task<Dictionary<string,string>> GetVersion()
+        {
+            var properties = new Dictionary<string, string>();
+            var assembly = typeof(Program).Assembly;
+            properties.Add("service", "HaaV Catalog Service"); // eller "HaaV Catalog Service
+            var ver = FileVersionInfo.GetVersionInfo(typeof(Program)
+                .Assembly.Location).ProductVersion;
+            properties.Add("version", ver!);
+            try {
+                var hostName = System.Net.Dns.GetHostName();
+                var ips = await System.Net.Dns.GetHostAddressesAsync(hostName);
+                var ipa = ips.First().MapToIPv4().ToString();
+                properties.Add("hosted-at-address", ipa);
+            } catch (Exception ex) {
+                _logger.LogError(ex.Message);
+                properties.Add("hosted-at-address", "Could not resolve IP-address");
+            }
+            return properties;
         }
         
         [HttpGet]
