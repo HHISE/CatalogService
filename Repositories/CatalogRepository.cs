@@ -11,8 +11,8 @@ public class CatalogRepository : ICatalogRepository
 
     public CatalogRepository(IConfiguration config)
     {
-        string? connectionString = config["Mongo:ConnectionString"];
-        string databaseName = config["Mongo:DatabaseName"];
+        string? connectionString = config["mongodb:ConnectionString"];
+        string databaseName = config["mongodb:DatabaseName"];
 
         MongoClient mongoClient = new MongoClient(connectionString);
         IMongoDatabase? mongoDatabase = mongoClient.GetDatabase(databaseName);
